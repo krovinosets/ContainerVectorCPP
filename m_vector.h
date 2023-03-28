@@ -17,7 +17,13 @@ public:
     ~m_vector(); // Деструктор, удаление вектора
     m_vector<Type> &operator =(const m_vector<Type>& lst); // Присваивание вектора другому вектору
     Type &operator[](int index); // получить элемент как массив a[1]
+    int get_length() const;
 };
+
+template<typename Type>
+int m_vector<Type>::get_length() const{
+    return amount;
+}
 
 template<typename Type>
 m_vector<Type>::m_vector(int length) : amount(length)
@@ -41,9 +47,9 @@ m_vector<Type>::m_vector(m_vector<Type> &&vect)
 }
 
 template<typename Type>
-m_vector<Type>::m_vector(std::initializer_list<Type> lst)
+m_vector<Type>::m_vector(std::initializer_list<Type> lst) : amount(lst.size())
 {
-    amount = lst.size();
+    m_vec = new Type[amount]{};
     int i = 0;
     for(Type item : lst)
         m_vec[i++] = item;
