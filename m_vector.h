@@ -1,13 +1,18 @@
 #ifndef M_VECTOR_H
 #define M_VECTOR_H
 
+#define THROW_BAD_VEC_IF(val) if (val) throw m_vectorException("Bad m_vector")
+
 #include <stdexcept>
 #include <initializer_list>
 
-class m_vectorException: public std::runtime_error
+class m_vectorException: public std::exception
 {
+private:
+    char *message;
 public:
-    explicit m_vectorException(const char* message) : std::runtime_error(message){}
+    explicit m_vectorException(const char *msg) : std::exception(){message = (char *)msg;}
+    const char *what() const noexcept{return message;}
 };
 
 template<typename Type>
@@ -28,11 +33,14 @@ public:
         Type value();
         bool is_end();
         Iterator &operator++();
+        Type &operator*();
+        bool operator ==(Iterator &b);
+        bool operator !=(Iterator &b);
     };
     m_vector(int length); // Конструктор по длине
     m_vector(const m_vector<Type> &vect); // Копирование
     m_vector(m_vector<Type> &&vect); // Перенос ака move(a2)
-    explicit m_vector(std::initializer_list<Type> lst); // конструктор со списком инициализации
+    explicit m_vector(std::initializer_list<Type> lst); // конструктор со списком инициализации // [!] Дыра в безопаности
     ~m_vector(); // Деструктор, удаление вектора
     m_vector<Type> &operator =(const m_vector<Type> &lst); // Присваивание вектора другому вектору
     Type &operator[](int index); // получить элемент как массив a[1]
@@ -54,14 +62,69 @@ public:
 };
 
 template <typename Type>
+bool m_vector<Type>::Iterator::operator!=(Iterator &b)
+{
+    return (it_m_vector_index != b.it_m_vector_index)
+            && (it_m_vector[it_m_vector_index] != b.it_m_vector[b.it_m_vector_index]);
+}
+
+template <typename Type>
+bool m_vector<Type>::Iterator::operator==(Iterator &b)
+{
+    return (it_m_vector_index == b.it_m_vector_index)
+            && (it_m_vector[it_m_vector_index] == b.it_m_vector[b.it_m_vector_index]);
+}
+
+template <typename Type>
+Type &m_vector<Type>::Iterator::operator*()
+{
+    return it_m_vector.m_vec[it_m_vector_index];
+}
+
+template <typename Type>
+typename m_vector<Type>::Iterator &m_vector<Type>::Iterator::operator++()
+{
+    if(it_m_vector_index == -1)
+        throw m_vectorException("Iterator doesn not exist");
+    if(it_m_vector_index + 1 > it_m_vector.get_length())
+        throw m_vectorException("Iterator out of range");
+    it_m_vector_index += 1;
+    return *this;
+}
+
+template <typename Type>
+bool m_vector<Type>::Iterator::is_end()
+{
+    if(it_m_vector_index == it_m_vector.get_length()-1)
+        return true;
+    else
+        return false;
+}
+
+template <typename Type>
+typename m_vector<Type>::Iterator m_vector<Type>::Iterator::next()
+{
+    if(it_m_vector_index == -1)
+        throw m_vectorException("Iterator doesn not exist");
+    if(it_m_vector_index + 1 > it_m_vector.get_length())
+        throw m_vectorException("Iterator out of range");
+    it_m_vector_index += 1;
+    return *this;
+}
+
+template <typename Type>
 Type m_vector<Type>::Iterator::value()
 {
     return it_m_vector.m_vec[it_m_vector_index];
 }
 
 template <typename Type>
-m_vector<Type>::Iterator::Iterator(m_vector<Type> container_obj)
-    : it_m_vector(container_obj), it_m_vector_index(0){}
+m_vector<Type>::Iterator::Iterator(m_vector<Type> container_obj) : it_m_vector(container_obj), it_m_vector_index(0)
+{
+    while(!(*this).is_end())
+        (*this).next();
+    it_m_vector_index = 0;
+}
 
 template<typename Type>
 typename m_vector<Type>::Iterator m_vector<Type>::iterator_begin()
@@ -69,17 +132,21 @@ typename m_vector<Type>::Iterator m_vector<Type>::iterator_begin()
     return m_vector<Type>::Iterator(*this);
 }
 
-//template<typename Type>
-//m_vector<Type>::Iterator::Iterator(m_vector<Type> container_obj){
-//    Iterator iterator = container_obj[0];
-//    while(iterator != NULL) {
-//        iterator.current = iterator.current->next;
-//    }
-//}
+template<typename Type>
+typename m_vector<Type>::Iterator m_vector<Type>::iterator_end()
+{
+    m_vector<Type>::Iterator it = m_vector<Type>::Iterator(*this);
+    while(!it.is_end())
+        it.next();
+    return it;
+}
 
 template<typename _T, typename T>
 m_vector<_T> operator/(const m_vector<_T> &v1, const T &val)
 {
+    THROW_BAD_VEC_IF(v1.amount == 0);
+    if(val == 0)
+        throw m_vectorException("devide to zero");
     for(int i = 0; i < v1.amount; i++)
         v1.m_vec[i] /= val;
     return v1;
@@ -88,6 +155,7 @@ m_vector<_T> operator/(const m_vector<_T> &v1, const T &val)
 template<typename _T, typename T>
 m_vector<_T> operator*(const m_vector<_T>& v1, const T &val)
 {
+    THROW_BAD_VEC_IF(v1.amount == 0);
     for(int i = 0; i < v1.amount; i++)
         v1.m_vec[i] *= val;
     return v1;
@@ -96,6 +164,8 @@ m_vector<_T> operator*(const m_vector<_T>& v1, const T &val)
 template<typename _T>
 m_vector<_T> operator-(const m_vector<_T> &v1, const m_vector<_T> &v2)
 {
+    THROW_BAD_VEC_IF(v1.amount == 0);
+    THROW_BAD_VEC_IF(v2.amount == 0);
     m_vector<_T> local(std::max(v1.amount, v2.amount));
     for(int i = 0; i < local.amount; i++)
         local[i] = ((i < v1.amount) ? v1.m_vec[i] : 0) - ((i < v2.amount) ? v2.m_vec[i] : 0);
@@ -105,6 +175,8 @@ m_vector<_T> operator-(const m_vector<_T> &v1, const m_vector<_T> &v2)
 template<typename _T>
 m_vector<_T> operator+(const m_vector<_T>& v1, const m_vector<_T>&v2)
 {
+    THROW_BAD_VEC_IF(v1.amount == 0);
+    THROW_BAD_VEC_IF(v2.amount == 0);
     m_vector<_T> local(v1.amount + v2.amount);
     for(int i = 0; i < v1.amount; i++)
         local[i] = v1.m_vec[i];
@@ -116,6 +188,9 @@ m_vector<_T> operator+(const m_vector<_T>& v1, const m_vector<_T>&v2)
 template<typename Type>
 m_vector<Type>& m_vector<Type>::operator /=(const Type &val)
 {
+    THROW_BAD_VEC_IF(amount == 0);
+    if(val == 0)
+        throw m_vectorException("devide to zero");
     for(int i = 0; i < amount; i++)
         m_vec[i] /= val;
     return *this;
@@ -124,6 +199,7 @@ m_vector<Type>& m_vector<Type>::operator /=(const Type &val)
 template<typename Type>
 m_vector<Type>& m_vector<Type>::operator *=(const Type& val)
 {
+    THROW_BAD_VEC_IF(amount == 0);
     for(int i = 0; i < amount; i++)
         m_vec[i] *= val;
     return *this;
@@ -132,6 +208,7 @@ m_vector<Type>& m_vector<Type>::operator *=(const Type& val)
 template<typename Type>
 m_vector<Type>& m_vector<Type>::operator -=(const m_vector<Type>& vect)
 {
+    THROW_BAD_VEC_IF(vect.amount == 0);
     m_vector<Type> local = *this;
     amount = std::max(local.amount, vect.amount);
     m_vec = new Type[amount]{};
@@ -143,6 +220,7 @@ m_vector<Type>& m_vector<Type>::operator -=(const m_vector<Type>& vect)
 template<typename Type>
 m_vector<Type> &m_vector<Type>::operator+=(const m_vector<Type> &vect)
 {
+    THROW_BAD_VEC_IF(vect.amount == 0);
     m_vector<Type> local = *this;
     amount = local.amount + vect.amount;
     m_vec = new Type[amount]{};
@@ -161,21 +239,23 @@ std::ostream &operator<<(std::ostream& os, const m_vector<Type> &lst)
         container += std::to_string(lst.m_vec[i]) + ", ";
     container = container.substr(0, container.size()-2); // Удалить два лишних ", "
     container += "]}";
-
     return os << container;
 }
 
 template<typename Type>
 Type *m_vector<Type>::to_array()
 {
+    THROW_BAD_VEC_IF(amount == 0);
     Type array[amount];
     for(int i =0; i < amount; i++)
         array[i] = m_vec[i];
+    return array;
 }
 
 template<typename Type>
 Type &m_vector<Type>::get_elem(int index)
 {
+    THROW_BAD_VEC_IF(amount == 0);
     if(index < 0 || amount < index)
         throw m_vectorException("Wrong index of m_vector");
     return m_vec[index];
@@ -184,6 +264,7 @@ Type &m_vector<Type>::get_elem(int index)
 template<typename Type>
 void m_vector<Type>::set_elem(int index, const Type &elem)
 {
+    THROW_BAD_VEC_IF(amount == 0);
     if(index < 0 || amount < index)
         throw m_vectorException("Wrong index of m_vector");
     m_vec[index] = elem;
@@ -198,9 +279,9 @@ int m_vector<Type>::get_length() const
 template<typename Type>
 m_vector<Type>::m_vector(int length)
 {
-    amount = length;
     if(length <= 0)
         throw m_vectorException("Bad length of m_vector");
+    amount = length;
     m_vec = new Type[length]{};
 }
 
@@ -253,6 +334,7 @@ m_vector<Type> &m_vector<Type>::operator=(const m_vector<Type> &lst)
 template<typename Type>
 Type &m_vector<Type>::operator[](int index)
 {
+    THROW_BAD_VEC_IF(amount == 0);
     if(index < 0 || amount < index)
         throw m_vectorException("Wrong index of m_vector");
     return *(m_vec + index);

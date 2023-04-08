@@ -50,6 +50,17 @@ void test_iterator()
         m_vector<int> a{4,5,6,3};
         m_vector<int>::Iterator it = a.iterator_begin();
         cout << MESSAGE << it.value() << endl;
+        cout << MESSAGE << *it << endl;
+        cout << MESSAGE << (++it).value() << endl;
+        m_vector<int> a2{4,5,6,3};
+        m_vector<int>::Iterator it2 = a2.iterator_end();
+        cout << MESSAGE << it2.value() << endl;
+        cout << MESSAGE << (it == it2) << endl;
+        cout << MESSAGE << (it != it2) << endl;
+        m_vector<int> vec{4,5,6,3};
+        m_vector<int> move = std::move(vec);
+        // vec.iterator_begin(); // Пример с битым вектором
+        // vec[0];              // после переноса
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
