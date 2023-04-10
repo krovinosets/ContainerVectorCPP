@@ -28,10 +28,11 @@ int main()
 //    test_constructor();
 //    test_copy();
 //    test_transfer();
-//    test_init_list();
+    test_init_list();
 //    test_set_elem();
 //    test_get_elem();
 //    test_operator_eq();
+    test_to_array();
 //    test_cout();
 //    test_sub();
 //    test_multiple();
@@ -148,7 +149,17 @@ void test_sub()
 
 void test_to_array()
 {
- // TODO:
+    try {
+        m_vector<int> a{4,5,6,3};
+        int *arr = a.to_array();
+        cout << MESSAGE << a.get_length() << endl;
+        for(int i = 0; i < a.get_length(); i++)
+            cout << MESSAGE << *(arr + i) << endl;
+        cout << MESSAGE << a << endl;
+        delete[] arr;
+    } catch(m_vectorException &e) {
+        cout << "Exception says: " << e.what() << endl;
+    }
 }
 
 void test_cout()
@@ -185,8 +196,14 @@ void test_get_elem()
 
 void test_init_list()
 {
-    m_vector<int> a{0,1,2,3};
-    cout << MESSAGE << a << endl;
+    try {
+        m_vector<int> a{0,1,2,3};
+        cout << MESSAGE << a << endl;
+        m_vector<int> a0{};
+        cout << MESSAGE << (a + a0) << endl;
+    } catch(m_vectorException &e) {
+        cout << "Exception says: " << e.what() << endl;
+    }
 }
 
 void test_transfer()

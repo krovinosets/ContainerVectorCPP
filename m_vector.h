@@ -84,11 +84,7 @@ Type &m_vector<Type>::Iterator::operator*()
 template <typename Type>
 typename m_vector<Type>::Iterator &m_vector<Type>::Iterator::operator++()
 {
-    if(it_m_vector_index == -1)
-        throw m_vectorException("Iterator doesn not exist");
-    if(it_m_vector_index + 1 > it_m_vector.get_length())
-        throw m_vectorException("Iterator out of range");
-    it_m_vector_index += 1;
+    m_vector<Type>::Iterator::next();
     return *this;
 }
 
@@ -246,7 +242,7 @@ template<typename Type>
 Type *m_vector<Type>::to_array()
 {
     THROW_BAD_VEC_IF(amount == 0);
-    Type array[amount];
+    Type *array = new Type[amount];
     for(int i =0; i < amount; i++)
         array[i] = m_vec[i];
     return array;
