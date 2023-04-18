@@ -21,28 +21,47 @@ void test_minus();
 void test_multiple_solo();
 void test_devide_solo();
 void test_iterator();
+void test_eq();
 
 int main()
 {
-    cout << "Hello Epta!" << endl;
-//    test_constructor();
-//    test_copy();
-//    test_transfer();
+    test_constructor();
+    test_copy();
+    test_transfer();
     test_init_list();
-//    test_set_elem();
-//    test_get_elem();
-//    test_operator_eq();
+    test_set_elem();
+    test_get_elem();
+    test_operator_eq();
     test_to_array();
-//    test_cout();
-//    test_sub();
-//    test_multiple();
-//    test_devide();
-//    test_plus();
-//    test_minus();
-//    test_multiple_solo();
-//    test_devide_solo();
+    test_cout();
+    test_sub();
+    test_multiple();
+    test_devide();
+    test_plus();
+    test_minus();
+    test_multiple_solo();
+    test_devide_solo();
     test_iterator();
+    test_eq();
     return 0;
+}
+
+void test_eq()
+{
+    try {
+        m_vector<int> a{4,5,6,3};
+        m_vector<int> a2(2);
+        m_vector<int> a3 = a2;
+        m_vector<int> a4 = std::move(a);
+        cout << MESSAGE << a3 << endl;
+        m_vector<int> a5{};
+        a2 = a5;
+        cout << MESSAGE << a3 << endl;
+        cout << MESSAGE << a << endl;
+        cout << MESSAGE << a5 << endl;
+    } catch(m_vectorException &e) {
+        cout << "Exception says: " << e.what() << endl;
+    }
 }
 
 void test_iterator()
@@ -60,8 +79,9 @@ void test_iterator()
         cout << MESSAGE << (it != it2) << endl;
         m_vector<int> vec{4,5,6,3};
         m_vector<int> move = std::move(vec);
-        // vec.iterator_begin(); // Пример с битым вектором
-        // vec[0];              // после переноса
+//        m_vector<int>::Iterator it3 = vec.iterator_begin(); // Пример с битым вектором
+//        cout << MESSAGE << it3.value() << endl;
+//        vec[0];              // после переноса
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
@@ -73,6 +93,9 @@ void test_devide_solo()
         m_vector<int> a{4,5,6,3};
         m_vector<int> a2 = a / 4;
         cout << MESSAGE << a2 << endl;
+        m_vector<int> a3{};
+        m_vector<int> a4 = a3 / 4;
+        cout << MESSAGE << a4 << endl;
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
@@ -84,6 +107,9 @@ void test_multiple_solo()
         m_vector<int> a{4,5,6,3};
         m_vector<int> a2 = a * 4;
         cout << MESSAGE << a2 << endl;
+        m_vector<int> a3{};
+        m_vector<int> a4 = a3 * 4;
+        cout << MESSAGE << a4 << endl;
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
@@ -96,6 +122,9 @@ void test_minus()
         m_vector<int> a2{4,5,6,3};
         m_vector<int> a3 = a1 - a2;
         cout << MESSAGE << a3 << endl;
+        m_vector<int> a4{};
+        m_vector<int> a5 = a1 - a4;
+        cout << MESSAGE << a5 << endl;
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
@@ -108,6 +137,9 @@ void test_plus()
         m_vector<int> a2{4,5,6,3};
         m_vector<int> a3 = a1 + a2;
         cout << MESSAGE << a3 << endl;
+        m_vector<int> a4{};
+        m_vector<int> a5 = a1 + a4;
+        cout << MESSAGE << a5 << endl;
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
@@ -119,6 +151,12 @@ void test_devide()
         m_vector<int> a{4,5,6,3};
         a /= 4;
         cout << MESSAGE << a << endl;
+        m_vector<int> a2{};
+        a2 /= 4;
+        cout << MESSAGE << a2 << endl;
+        m_vector<int> a3{4,5,6,3};
+        a3 /= 0;
+        cout << MESSAGE << a3 << endl;
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
@@ -130,6 +168,12 @@ void test_multiple()
         m_vector<int> a{4,5,6,3};
         a *= 4;
         cout << MESSAGE << a << endl;
+        m_vector<int> a2{};
+        a2 *= 4;
+        cout << MESSAGE << a2 << endl;
+        m_vector<int> a3{4,5,6,3};
+        a3 *= 0;
+        cout << MESSAGE << a3 << endl;
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
@@ -141,6 +185,9 @@ void test_sub()
         m_vector<int> a{4,5,6,3};
         m_vector<int> a1{1, 1, 1, 45, 1};
         a -= a1;
+        cout << MESSAGE << a << endl;
+        m_vector<int> a2{};
+        a -= a2;
         cout << MESSAGE << a << endl;
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
@@ -175,6 +222,11 @@ void test_operator_eq()
         m_vector<int> a1{1, 1, 1};
         a += a1;
         cout << MESSAGE << a << endl;
+        m_vector<int> a2{};
+        a += a2;
+        cout << MESSAGE << a << endl;
+        a2 += a;
+        cout << MESSAGE << a2 << endl;
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
@@ -200,7 +252,7 @@ void test_init_list()
         m_vector<int> a{0,1,2,3};
         cout << MESSAGE << a << endl;
         m_vector<int> a0{};
-        cout << MESSAGE << (a + a0) << endl;
+        cout << MESSAGE << a0 << endl;
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
@@ -247,8 +299,12 @@ void test_set_elem()
         cout << MESSAGE << a << endl;
         a.set_elem(3, 45);
         cout << MESSAGE << a << endl;
-        a.set_elem(99, 45);
-        cout << MESSAGE << a << endl;
+        m_vector<int> a2{};
+        cout << MESSAGE << a2 << endl;
+        a2.set_elem(0, 45);
+        cout << MESSAGE << a2 << endl;
+//        a.set_elem(99, 45);
+//        cout << MESSAGE << a << endl;
     } catch(m_vectorException &e) {
         cout << "Exception says: " << e.what() << endl;
     }
