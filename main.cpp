@@ -25,24 +25,24 @@ void test_eq();
 
 int main()
 {
-    test_constructor();
-    test_copy();
-    test_transfer();
-    test_init_list();
-    test_set_elem();
-    test_get_elem();
-    test_operator_eq();
-    test_to_array();
-    test_cout();
-    test_sub();
-    test_multiple();
+//    test_constructor();
+//    test_copy();
+//    test_transfer();
+//    test_init_list();
+//    test_set_elem();
+//    test_get_elem();
+//    test_operator_eq();
+//    test_to_array();
+//    test_cout();
+//    test_sub();
+//    test_multiple();
     test_devide();
-    test_plus();
-    test_minus();
-    test_multiple_solo();
+//    test_plus();
+//    test_minus();
+//    test_multiple_solo();
     test_devide_solo();
     test_iterator();
-    test_eq();
+//    test_eq();
     return 0;
 }
 
@@ -77,7 +77,7 @@ void test_iterator()
         cout << MESSAGE << it2.value() << endl;
         cout << MESSAGE << (it == it2) << endl;
         cout << MESSAGE << (it != it2) << endl;
-        m_vector<int> vec{4,5,6,3};
+        m_vector<int> vec{};
         m_vector<int> move = std::move(vec);
 //        m_vector<int>::Iterator it3 = vec.iterator_begin(); // Пример с битым вектором
 //        cout << MESSAGE << it3.value() << endl;

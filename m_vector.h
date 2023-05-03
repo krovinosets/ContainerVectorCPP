@@ -164,42 +164,28 @@ m_vector<_T> operator+(const m_vector<_T>& v1, const m_vector<_T>&v2)
 template<typename Type>
 m_vector<Type>& m_vector<Type>::operator /=(const Type &val)
 {
-    if(val == 0)
-        throw m_vectorException("devide to zero");
-    for(int i = 0; i < amount; i++)
-        m_vec[i] /= val;
+    *this = *this / val;
     return *this;
 }
 
 template<typename Type>
 m_vector<Type>& m_vector<Type>::operator *=(const Type& val)
 {
-    for(int i = 0; i < amount; i++)
-        m_vec[i] *= val;
+    *this = *this * val;
     return *this;
 }
 
 template<typename Type>
 m_vector<Type>& m_vector<Type>::operator -=(const m_vector<Type>& vect)
 {
-    m_vector<Type> local = *this;
-    amount = std::max(local.amount, vect.amount);
-    m_vec = new Type[amount]{};
-    for(int i = 0; i < amount; i++)
-        m_vec[i] = ((i < local.amount) ? local.m_vec[i] : 0) - ((i < vect.amount) ? vect.m_vec[i] : 0);
+    *this = *this - vect;
     return *this;
 }
 
 template<typename Type>
 m_vector<Type> &m_vector<Type>::operator+=(const m_vector<Type> &vect)
 {
-    m_vector<Type> local = *this;
-    amount = local.amount + vect.amount;
-    m_vec = new Type[amount]{};
-    for(int i = 0; i < local.amount; i++)
-        m_vec[i] = local.m_vec[i];
-    for(int i = 0; i < vect.amount; i++)
-        m_vec[local.amount+i] = vect.m_vec[i];
+    *this = *this + vect;
     return *this;
 }
 
@@ -218,10 +204,14 @@ std::ostream &operator<<(std::ostream& os, const m_vector<Type> &lst)
 template<typename Type>
 Type *m_vector<Type>::to_array()
 {
-    Type *array = new Type[amount];
-    for(int i =0; i < amount; i++)
-        array[i] = m_vec[i];
-    return array;
+    try{
+        Type *array = new Type[amount];
+        for(int i =0; i < amount; i++)
+            array[i] = m_vec[i];
+        return array;
+    } catch (std::bad_alloc const&){
+        throw m_vectorException("bad alloc");
+    }
 }
 
 template<typename Type>
@@ -249,19 +239,27 @@ int m_vector<Type>::get_length() const
 template<typename Type>
 m_vector<Type>::m_vector(int length)
 {
-    if(length <= 0)
-        throw m_vectorException("Bad length of m_vector");
-    amount = length;
-    m_vec = new Type[length]{};
+    try {
+        if(length <= 0)
+            throw m_vectorException("Bad length of m_vector");
+        amount = length;
+        m_vec = new Type[length]{};
+    } catch (std::bad_alloc const&){
+        throw m_vectorException("bad alloc");
+    }
 }
 
 template<typename Type>
 m_vector<Type>::m_vector(const m_vector<Type> &vect)
 {
-    amount = vect.amount;
-    m_vec = new Type[amount];
-    for(int i = 0; i < amount; i++)
-        m_vec[i] = vect.m_vec[i];
+    try {
+        amount = vect.amount;
+        m_vec = new Type[amount];
+        for(int i = 0; i < amount; i++)
+            m_vec[i] = vect.m_vec[i];
+    } catch (std::bad_alloc const&){
+        throw m_vectorException("bad alloc");
+    }
 }
 
 template<typename Type>
@@ -276,12 +274,16 @@ m_vector<Type>::m_vector(m_vector<Type> &&vect)
 template<typename Type>
 m_vector<Type>::m_vector(std::initializer_list<Type> lst) : amount(lst.size())
 {
-    if(amount < 0)
-        throw m_vectorException("Bad length of m_vector");
-    m_vec = new Type[amount]{};
-    int i = 0;
-    for(Type item : lst)
-        m_vec[i++] = item;
+    try{
+        if(amount < 0)
+            throw m_vectorException("Bad length of m_vector");
+        m_vec = new Type[amount]{};
+        int i = 0;
+        for(Type item : lst)
+            m_vec[i++] = item;
+    } catch (std::bad_alloc const&){
+        throw m_vectorException("bad alloc");
+    }
 }
 
 template<typename Type>
@@ -293,12 +295,16 @@ m_vector<Type>::~m_vector()
 template<typename Type>
 m_vector<Type> &m_vector<Type>::operator=(const m_vector<Type> &lst)
 {
-    m_vec = new Type[lst.amount]{};
-    amount = lst.amount;
-    for(int i = 0; i < lst.amount; i++)
-        m_vec[i] = lst.m_vec[i];
+    try {
+        m_vec = new Type[lst.amount]{};
+        amount = lst.amount;
+        for(int i = 0; i < lst.amount; i++)
+            m_vec[i] = lst.m_vec[i];
 
-    return *this; // возвращает объект, который сгенерировал вызов
+        return *this; // возвращает объект, который сгенерировал вызов
+    } catch (std::bad_alloc const&){
+        throw m_vectorException("bad alloc");
+    }
 }
 
 template<typename Type>
