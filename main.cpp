@@ -68,7 +68,10 @@ void test_iterator()
 {
     try {
         m_vector<int> a{4,5,6,3};
+        m_vector<int> b{4,5,6,3};
         m_vector<int>::Iterator it = a.iterator_begin();
+        m_vector<int>::Iterator it3 = b.iterator_begin();
+        cout << MESSAGE << "!!!!!!!!!" << (it != it) << endl;
         cout << MESSAGE << it.value() << endl;
         cout << MESSAGE << *it << endl;
         cout << MESSAGE << (++it).value() << endl;
