@@ -32,7 +32,7 @@ public:
     explicit m_vector(std::initializer_list<Type> lst); // конструктор со списком инициализации // [!] Дыра в безопаности
     ~m_vector(); // Деструктор, удаление вектора
     m_vector<Type> &operator=(const m_vector<Type> &lst); // Присваивание вектора другому вектору
-    Type &operator[](int index); // получить элемент как массив a[1]
+    Type &operator[](int index) const; // получить элемент как массив a[1]
     int get_length() const;
     void set_elem(int index, const Type &elem);
     Type &get_elem(int index);
@@ -118,16 +118,16 @@ m_vector<_T> operator/(const m_vector<_T> &v1, const T &val)
 {
     if(val == 0)
         throw m_vectorException("devide to zero");
-    m_vector<_T> local = v1;
+    m_vector<_T> local(v1);
     for(int i = 0; i < local.amount; i++)
         local.m_vec[i] /= val;
-    return v1;
+    return local;
 }
 
 template<typename _T, typename T>
 m_vector<_T> operator*(const m_vector<_T>& v1, const T &val)
 {
-    m_vector<_T> local = v1;
+    m_vector<_T> local(v1);
     for(int i = 0; i < local.amount; i++)
         local.m_vec[i] *= val;
     return local;
@@ -152,7 +152,7 @@ m_vector<_T> operator+(const m_vector<_T>& v1, const m_vector<_T>&v2)
     m_vector<_T> local(v1.get_length());
     for(int i = 0; i < local.amount; i++)
         local[i] = (v1[i] + v2[i]);
-    return v1;
+    return local;
 }
 
 template<typename Type>
@@ -204,7 +204,6 @@ Type *m_vector<Type>::to_array()
             array[i] = m_vec[i];
         return array;
     } catch (std::bad_alloc const&){
-        m_vec = nullptr;
         throw m_vectorException("bad alloc");
     }
 }
@@ -212,17 +211,13 @@ Type *m_vector<Type>::to_array()
 template<typename Type>
 Type &m_vector<Type>::get_elem(int index)
 {
-    if(index < 0 || amount <= index)
-        throw m_vectorException("Wrong index of m_vector");
     return m_vec[index];
 }
 
 template<typename Type>
 void m_vector<Type>::set_elem(int index, const Type &elem)
 {
-    if(index < 0 || amount <= index)
-        throw m_vectorException("Wrong index of m_vector");
-    m_vec[index] = elem;
+    get_elem(index) = elem;
 }
 
 template<typename Type>
@@ -241,6 +236,7 @@ m_vector<Type>::m_vector(int length)
         m_vec = new Type[length]{};
     } catch (std::bad_alloc const&){
         m_vec = nullptr;
+        amount = 0;
         throw m_vectorException("bad alloc");
     }
 }
@@ -255,6 +251,7 @@ m_vector<Type>::m_vector(const m_vector<Type> &vect)
             m_vec[i] = vect.m_vec[i];
     } catch (std::bad_alloc const&){
         m_vec = nullptr;
+        amount = 0;
         throw m_vectorException("bad alloc");
     }
 }
@@ -271,15 +268,16 @@ m_vector<Type>::m_vector(m_vector<Type> &&vect)
 template<typename Type>
 m_vector<Type>::m_vector(std::initializer_list<Type> lst) : amount(lst.size())
 {
+    if(amount < 0)
+        throw m_vectorException("Bad length of m_vector");
     try{
-        if(amount < 0)
-            throw m_vectorException("Bad length of m_vector");
         m_vec = new Type[amount]{};
         int i = 0;
         for(Type item : lst)
             m_vec[i++] = item;
     } catch (std::bad_alloc const&){
         m_vec = nullptr;
+        amount = 0;
         throw m_vectorException("bad alloc");
     }
 }
@@ -294,21 +292,14 @@ m_vector<Type>::~m_vector()
 template<typename Type>
 m_vector<Type> &m_vector<Type>::operator=(const m_vector<Type> &lst)
 {
-    // m_vector<int> a = m_vector<int> b(5);
-    try {
-        m_vec = new Type[lst.amount]{};
-        amount = lst.amount;
-        for(int i = 0; i < lst.amount; i++)
-            m_vec[i] = lst.m_vec[i];
-        return *this; // возвращает объект, который сгенерировал вызов
-    } catch (std::bad_alloc const&){
-        m_vec = nullptr;
-        throw m_vectorException("bad alloc");
-    }
+    m_vector<Type> local(lst);
+    amount = local.amount;
+    m_vec = local.m_vec;
+    return *this;
 }
 
 template<typename Type>
-Type &m_vector<Type>::operator[](int index)
+Type &m_vector<Type>::operator[](int index) const
 {
     if(index < 0 || amount <= index)
         throw m_vectorException("Wrong index of m_vector");
