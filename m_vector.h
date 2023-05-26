@@ -120,7 +120,7 @@ m_vector<_T> operator/(const m_vector<_T> &v1, const T &val)
         throw m_vectorException("devide to zero");
     m_vector<_T> local(v1);
     for(int i = 0; i < local.amount; i++)
-        local.m_vec[i] /= val;
+        local.m_vec[i] = v1.m_vec[i] / val;
     return local;
 }
 
@@ -129,7 +129,7 @@ m_vector<_T> operator*(const m_vector<_T>& v1, const T &val)
 {
     m_vector<_T> local(v1);
     for(int i = 0; i < local.amount; i++)
-        local.m_vec[i] *= val;
+        local.m_vec[i] = v1.m_vec[i] * val;
     return local;
 }
 

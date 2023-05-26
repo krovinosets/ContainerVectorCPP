@@ -152,7 +152,7 @@ void test_devide()
 {
     try {
         m_vector<int> a{4,5,6,3};
-        a /= 4;
+        a = a / 4;
         cout << MESSAGE << a << endl;
         m_vector<int> a2{};
         a2 /= 4;
